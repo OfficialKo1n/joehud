@@ -30,17 +30,32 @@ AddEventHandler('esx:setJob', function(job)
 	ESX.PlayerData.job = job
 end)
 
-RegisterKeyMapping('speedlimiter', 'SpeedLimiter', 'keyboard', 'CAPITAL')
-RegisterKeyMapping('seatbelt', 'Seatbelt', 'keyboard', 'B')
+RegisterKeyMapping('speedlimiter2', '(UI) SpeedLimiter~', 'keyboard', 'M')
+RegisterKeyMapping('seatbelt', '(UI) Seatbelt~', 'keyboard', 'B')
 
 RegisterCommand('seatbelt', function()
-    seatbelt()
+    local inVehicle = IsPedInAnyVehicle(ESX.PlayerData.ped, false)
+
+    if inVehicle then
+        seatbelt()
+    end
 end, false)    
 
 
 local speedBuffer  = {}
 local velBuffer    = {}
 local wasInCar     = false
+
+function seatbelt()
+    beltOn = not beltOn				  
+    if beltOn then
+        ESX.ShowNotification('Memasang seatbelt', 'success')
+        SendNUIMessage({seatbelton = true})
+    else
+        ESX.ShowNotification('Melepas seatbelt', 'error')
+        SendNUIMessage({seatbelton = false})
+    end 
+end
 
 Citizen.CreateThread(function()
 	while true do
@@ -71,17 +86,7 @@ Citizen.CreateThread(function()
 				
 			velBuffer[2] = velBuffer[1]
 			velBuffer[1] = GetEntityVelocity(car)
-            
-            function seatbelt()
-				beltOn = not beltOn				  
-				if beltOn then
-                    ESX.ShowNotification('Memasang seatbelt', 'success')
-                    SendNUIMessage({seatbelton = true})
-				else
-                    ESX.ShowNotification('Melepas seatbelt', 'error')
-                    SendNUIMessage({seatbelton = false})
-                end 
-		    end
+        
 		elseif wasInCar then
             wasInCar = false
             beltOn = false
@@ -118,7 +123,7 @@ Citizen.CreateThread( function()
         local isTalking = NetworkIsPlayerTalking(PlayerId())
 
         SendNUIMessage({talking = isTalking})
-        RegisterCommand('speedlimiter', function()
+        RegisterCommand('speedlimiter2', function()
             local inVehicle = GetIsVehicleEngineRunning(GetVehiclePedIsIn(ESX.PlayerData.ped)) == 1 
             if (inVehicle) then
                 if (GetPedInVehicleSeat(vehicle, -1) == ESX.PlayerData.ped) then	
